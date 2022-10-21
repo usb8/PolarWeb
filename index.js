@@ -1,5 +1,7 @@
 let heartElement = document.getElementById('heart')
+let batteryElement = document.getElementById('battery')
 let dataElement = document.getElementById('data')
+
 let connectBtnElement = document.getElementById('connectButton')
 let hrBtnElement = document.getElementById('hrButton')
 
@@ -23,6 +25,13 @@ else {
         server = device.gatt.connect()
         return server
       })
+      .then(server => server.getPrimaryService('battery_service'))
+      .then(service => service.getCharacteristic('battery_level'))
+      .then(characteristic => characteristic.readValue())
+      .then(value => {
+        let batteryLevel = value.getUint8(0)
+        batteryElement.textContent = 'Battery: ' + batteryLevel + ' %'
+      })
       .catch(error => { console.error(error) })
   }
   connectBtnElement.addEventListener('click', onConnectBtnClick)
@@ -35,7 +44,7 @@ else {
         // console.log(event.target.value)
         heartElement.hidden = false
         let heartrate = event.target.value.getUint8(1)
-        dataElement.textContent = heartrate + " BPM"
+        dataElement.textContent = heartrate + ' BPM'
       }
       server
         .then(server => server.getPrimaryService('heart_rate'))  // get the service
@@ -50,4 +59,3 @@ else {
   }
   hrBtnElement.addEventListener('click', onHrBtnClick)
 }
-
